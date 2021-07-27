@@ -1,2 +1,2 @@
-# knowledge-graph-persian
+# question-generation-persian
 generating question using knowledge graphs in persian language
