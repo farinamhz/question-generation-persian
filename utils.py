@@ -12,6 +12,8 @@ my_tokenizer = Tokenizer()
 my_stemmer = FindStems()
 my_tagger = POSTagger(tagging_model="wapiti")
 my_chunker = FindChunks()
+stop_words = "\n".join(sorted(list(
+    set([my_normalizer.normalize(w) for w in codecs.open('nonverbal', encoding='utf-8').read().split('\n') if w]))))
 
 
 def build_graph(matrix):
@@ -73,7 +75,7 @@ def BFS(s, end, graph, max_size=-1, black_list_relation=[]):
     return candidate_facts
 
 
-def create_mapping(sentence, return_pt=False, nlp=None, tokenizer=None):
+def create_mapping(sentence, return_pt=False, tokenizer=None):
     '''Create a mapping
         tokenizer: huggingface tokenizer
     '''
@@ -93,8 +95,40 @@ def create_mapping(sentence, return_pt=False, nlp=None, tokenizer=None):
     chunks = my_chunker.chunk_sentence(text_tags)
     result = my_chunker.convert_nestedtree2rawstring(chunks)
 
+    # print("tagged result", result)
+
     for ch in ",-.«»؛،؟۰!":
         result = result.replace(ch, "")
+
+    # ###################################################3
+    # verbs
+    result_items_v = []
+    verbs = []
+    s_v = ""
+    i_v = 0
+    while i_v < len(result):
+        if result[i_v] != "[":
+            i_v += 1
+        else:
+            while result[i_v] != "]":
+                i_v += 1
+                s_v += result[i_v]
+            result_items_v.append(s_v.strip(" ]"))
+            s_v = ""
+    # print("result_items_v", result_items_v)
+    for a in result_items_v:
+        if a.find("V") != -1:
+            # print("A", a)
+            for ch in "VPND":
+                a = a.replace(ch, "")
+            verbs.append(a.strip(" "))
+
+    # for i in range(len(verbs)):
+    #     tokens1 = verbs[i].split(" ")
+    #     tokens_filtered = [word for word in tokens1 if word not in stop_words]
+    #     verbs[i] = " ".join(tokens_filtered)
+    # ##################################################
+
     for ch in "VPND":
         result = result.replace(ch, "")
 
@@ -110,19 +144,22 @@ def create_mapping(sentence, return_pt=False, nlp=None, tokenizer=None):
                 s += result[i]
             result_items.append(s.strip(" ]"))
             s = ""
+    # print("result_items", result_items)
 
-    # stop_words = requests.get('https://raw.githubusercontent.com/kharazi/persian-stopwords/master/nonverbal').text.split('\n')
-    stop_words = "\n".join(sorted(list(
-        set([my_normalizer.normalize(w) for w in codecs.open('nonverbal', encoding='utf-8').read().split('\n') if w]))))
     for i in range(len(result_items)):
+        if result_items[i] in verbs:
+            continue
         tokens1 = result_items[i].split(" ")
         tokens_filtered = [word for word in tokens1 if word not in stop_words]
         result_items[i] = " ".join(tokens_filtered)
 
-    result_items.remove('')
+    for a in result_items:
+        if a == '':
+            result_items.remove('')
+        elif a == ' ':
+            result_items.remove(' ')
     # print([(idx, token) for idx, token in enumerate(tokens)])
     # print("result_items", result_items)
-
     doc = []
     first_tokens = []
     size_tokens = []
@@ -130,10 +167,11 @@ def create_mapping(sentence, return_pt=False, nlp=None, tokenizer=None):
         chunk_tokens = a.split(" ")
         first_tokens.append(chunk_tokens[0])
         size_tokens.append(len(chunk_tokens))
-    # print("first_tokens", first_tokens)
-    # print("size_tokens", size_tokens)
+
     j = 0
     len_tokens = len(tokens)
+    # print("first_tokens", first_tokens)
+    # print("tokens")
     for i in range(len(first_tokens)):
         while j < len_tokens and first_tokens[i] != tokens[j]:
             j += 1
@@ -163,7 +201,7 @@ def create_mapping(sentence, return_pt=False, nlp=None, tokenizer=None):
     token2id = {}
     mode = 0  # 1 in chunk, 0 not in chunk
     chunk_id = 0
-
+    # print("verbs", verbs)
     # print("noun_chunks:", noun_chunks)
 
     for idx, token in enumerate(tokens):
@@ -184,7 +222,7 @@ def create_mapping(sentence, return_pt=False, nlp=None, tokenizer=None):
             sentence_mapping.append(tokens[idx])
             token2id[sentence_mapping[-1]] = len(token2id)
 
-    print("token2id", token2id)
+    # print("token2id", token2id)
 
     token_ids = []
     tokenid2word_mapping = []
@@ -206,7 +244,7 @@ def create_mapping(sentence, return_pt=False, nlp=None, tokenizer=None):
         for key, value in outputs.items():
             outputs[key] = torch.from_numpy(np.array(value)).long().unsqueeze(0)
 
-    return outputs, tokenid2word_mapping, token2id, noun_chunks
+    return verbs, outputs, tokenid2word_mapping, token2id, noun_chunks
     # return outputs, tokenid2word_mapping, token2id, noun_chunks, linked_entities
 
 
