@@ -126,3 +126,19 @@ def parse_sentence(sentence, tokenizer, encoder):
 
     return triplet_text
     # return triplet_text, disamb_ents
+
+
+def deduplication(triplets):
+    unique_pairs = []
+    pair_confidence = []
+    for t in triplets:
+        key = '{}\t{}\t{}'.format(t['h'], t['r'], t['t'])
+        conf = t['c']
+        if key not in unique_pairs:
+            unique_pairs.append(key)
+            pair_confidence.append(conf)
+
+    unique_triplets = []
+    for idx, unique_pair in enumerate(unique_pairs):
+        h, r, t = unique_pair.split('\t')
+        unique_triplets.append({'h': h, 'r': r, 't': t, 'c': pair_confidence[idx]})
