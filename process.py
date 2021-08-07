@@ -3,6 +3,8 @@ from multiprocessing import Pool
 
 import torch
 
+from parsivar import Tokenizer
+my_tokenizer = Tokenizer()
 
 # from utils import create_mapping, compress_attention, build_graph
 
@@ -128,6 +130,22 @@ def parse_sentence(sentence, tokenizer, encoder):
     # return triplet_text, disamb_ents
 
 
+def deduplication2(output_tri):
+    for i in range(len(output_tri)):
+        a_tokens = my_tokenizer.tokenize_words(output_tri[i]['h'])
+        for j in range(len(output_tri)):
+            b_tokens = my_tokenizer.tokenize_words(output_tri[j]['h'])
+            for x in a_tokens:
+                if x in b_tokens and not x.isnumeric():
+                    if len(output_tri[i]['h']) > len(output_tri[j]['h']):
+                        output_tri[j]['h'] = output_tri[i]['h']
+                        break
+                    elif len(output_tri[i]['h']) < len(output_tri[j]['h']):
+                        output_tri[i]['h'] = output_tri[j]['h']
+                        break
+    return output_tri
+
+
 def deduplication(triplets):
     unique_pairs = []
     pair_confidence = []
@@ -142,3 +160,4 @@ def deduplication(triplets):
     for idx, unique_pair in enumerate(unique_pairs):
         h, r, t = unique_pair.split('\t')
         unique_triplets.append({'h': h, 'r': r, 't': t, 'c': pair_confidence[idx]})
+    return unique_triplets
