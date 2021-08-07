@@ -62,11 +62,15 @@ def network_graph(cmd="venv/bin/python3.8 match.py"):
     edge_trace = go.Scatter(
         x=edge_x, y=edge_y,
         line=dict(width=0.5, color='#888'),
+        textfont=dict(
+            size=16),
         mode='lines')
 
     eweights_trace = go.Scatter(x=xtext, y=ytext, mode='text',
                                 marker_size=0.5,
                                 text=etext,
+                                textfont=dict(
+                                    size=16),
                                 textposition='top center',
                                 hovertemplate='weight: %{text}<extra></extra>')
 
@@ -82,9 +86,11 @@ def network_graph(cmd="venv/bin/python3.8 match.py"):
         x=node_x, y=node_y,
         mode='markers+text',
         hoverinfo='text',
+        textfont=dict(
+            size=16),
         textposition="bottom center",
         text=list(G.nodes()),
-        marker={'size': 50, 'color': 'LightSkyBlue'}
+        marker={'size': 50, 'color': 'Purple'}
     )
 
     figure = go.Figure(data=[edge_trace, node_trace, eweights_trace],
@@ -135,9 +141,6 @@ app.layout = html.Div([
 @app.callback(
     dash.dependencies.Output(component_id='my_graph', component_property='figure'),
     [dash.dependencies.Input('submit-val', 'n_clicks')],
-    # state=[dash.dependencies.State(component_id='noun', component_property='on'),
-    #        dash.dependencies.State(component_id='ner', component_property='on'),
-    #        ]
 )
 def update_graph(n_clicks):
     return network_graph()
