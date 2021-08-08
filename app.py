@@ -36,7 +36,7 @@ def network_graph(cmd="venv/bin/python3.8 match.py"):
 
             for tup in current_line['tri']:
                 # G.add_edge(tup['h'], tup['t'], label=str(tup['r']) + "_" + str(np.round(tup['c'], 2)))
-                G.add_edge(tup['h'], tup['t'], label=str(tup['r'][0]))
+                G.add_edge(tup['h'], tup['t'], label=tup['r'])
 
     pos = nx.shell_layout(G)
 
