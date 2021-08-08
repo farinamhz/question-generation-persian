@@ -2,7 +2,10 @@ import requests
 import json
 
 # from numpy import unicode
-import unicodedata
+
+from parsivar import Tokenizer, FindStems
+
+my_tokenizer = Tokenizer()
 
 
 def call_api(url, data, token_key):
@@ -47,45 +50,43 @@ def detect(text, base_url, token_key):
     return result[0]['Tags']['NER']['Item1']
 
 
-# print(result)
-# for phrase in result:
-#     print(phrase['Tags']['NER']['Item1'])
+def print_question_and_answers(questions, answers):
+    for i in range(len(questions)):
+        print("سوال: ", questions[i])
+        print("جواب: ", answers[i])
 
 
 if __name__ == '__main__':
+    time_words = ['صبح', 'ظهر', 'عصر', 'غروب', 'عصر', 'شب', 'ساعت']
     triplets = read_triplets()
     base_url, token_key = get_token()
     questions = []
     answers = []
-    unique_list_head = []
-    unique_list_tail = []
 
     for a in triplets:
-        print(a['t'])
-        # if a['t'] in unique_list_tail and a['h'] in unique_list_head:
-        #     continue
-        # else:
-        unique_list_tail.append(a['t'])
-        unique_list_head.append(a['h'])
         # print(a['t'])
+        tail_tokens = my_tokenizer.tokenize_words(a['t'])
         text = a['t']
         text = f'"{text}"'
         entity_type = detect(text, base_url, token_key)
         # print(entity_type)
         s = ''
         if entity_type.find("DAT") != -1:
-            s = a['h'] + " در چه زمانی " + str(a['r']) + "؟"
+
+            date_text = " در چه زمانی " if set(tail_tokens).intersection(set(time_words)) else " در چه تاریخی "
+
+            s = a['h'] + date_text + str(a['r']) + "؟"
             questions.append(s)
             answers.append(a['t'])
+
         elif entity_type.find("PER") != -1:
             s = a['h'] + " با چه کسی " + str(a['r']) + "؟"
             questions.append(s)
             answers.append(a['t'])
+
         elif entity_type.find("LOC") != -1:
             s = a['h'] + " در کجا " + str(a['r']) + "؟"
             questions.append(s)
             answers.append(a['t'])
 
-    for i in range(len(questions)):
-        print("سوال: ", questions[i])
-        print("جواب: ", answers[i])
+    print_question_and_answers(questions, answers)
