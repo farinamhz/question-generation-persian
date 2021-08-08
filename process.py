@@ -3,8 +3,11 @@ from multiprocessing import Pool
 
 import torch
 
-from parsivar import Tokenizer
+from parsivar import Tokenizer, FindStems
+
 my_tokenizer = Tokenizer()
+my_stemmer = FindStems()
+
 
 # from utils import create_mapping, compress_attention, build_graph
 
@@ -35,9 +38,9 @@ def check_relations_validity(relations):
     return True
 
 
-def global_initializer(nlp_object):
-    global pars_nlp
-    pars_nlp = nlp_object
+# def global_initializer(nlp_object):
+#     global pars_nlp
+#     pars_nlp = nlp_object
 
 
 def filter_relation_sets(params):
@@ -52,16 +55,20 @@ def filter_relation_sets(params):
         tail = id2token[tail]
         # print("xxx tail", tail)
         # relations = [id2token[idx] for idx in triplet_idx[1:-1] if idx in id2token]
-
+        # print("verbs", verbs)
+        # print("token2id", token2id)
         pre_relations = [n for n in verbs if token2id[n] - token2id[tail] > 0]  # and token2id[n] == near_verb_id]
         relations = []
         near_verb_id = min([token2id[n] for n in pre_relations])
+        # relations.append(my_stemmer.convert_to_stem(id2token[near_verb_id]))
         relations.append(id2token[near_verb_id])
         # print(relations)
         if len(relations) > 0:
             return {'h': head, 't': tail, 'r': relations, 'c': confidence}
     return {}
 
+def contains_number(value):
+    return any([char.isdigit() for char in value])
 
 def parse_sentence(sentence, tokenizer, encoder):
     '''Implement the match part of MAMA
@@ -86,7 +93,7 @@ def parse_sentence(sentence, tokenizer, encoder):
     # print(token2id)
     for head in noun_chunks:
         for tail in noun_chunks:
-            if head != tail and tail not in verbs:
+            if head != tail and tail not in verbs and head not in verbs and not contains_number(head):
                 tail_head_pairs.append((token2id[head], token2id[tail]))
 
     # print("tail_head_pairs", tail_head_pairs)
@@ -145,19 +152,20 @@ def deduplication2(output_tri):
                         break
     return output_tri
 
-
-def deduplication(triplets):
-    unique_pairs = []
-    pair_confidence = []
-    for t in triplets:
-        key = '{}\t{}\t{}'.format(t['h'], t['r'], t['t'])
-        conf = t['c']
-        if key not in unique_pairs:
-            unique_pairs.append(key)
-            pair_confidence.append(conf)
-
-    unique_triplets = []
-    for idx, unique_pair in enumerate(unique_pairs):
-        h, r, t = unique_pair.split('\t')
-        unique_triplets.append({'h': h, 'r': r, 't': t, 'c': pair_confidence[idx]})
-    return unique_triplets
+# def deduplication(triplets):
+#     print("xxx1", triplets)
+#     unique_pairs = []
+#     pair_confidence = []
+#     for t in triplets:
+#         key = '{}\t{}\t{}'.format(t['h'], t['r'], t['t'])
+#         conf = t['c']
+#         if key not in unique_pairs:
+#             unique_pairs.append(key)
+#             pair_confidence.append(conf)
+#
+#     unique_triplets = []
+#     for idx, unique_pair in enumerate(unique_pairs):
+#         h, r, t = unique_pair.split('\t')
+#         unique_triplets.append({'h': h, 'r': r, 't': t, 'c': pair_confidence[idx]})
+#     print("xxx۲", unique_triplets)
+#     return unique_triplets

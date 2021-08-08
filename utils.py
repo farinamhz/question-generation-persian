@@ -57,16 +57,16 @@ def BFS(s, end, graph, max_size=-1, black_list_relation=[]):
 
     candidate_facts = []
     for path_pairs in found_paths:
-        if len(path_pairs) < 3:
-            continue
+        # if len(path_pairs) < 3: #####
+        #     continue
         path = []
         cum_conf = 0
         for (node, conf) in path_pairs:
             path.append(node)
             cum_conf += conf
 
-        if path[1] in black_list_relation:
-            continue
+        # if path[1] in black_list_relation:
+        #     continue
 
         candidate_facts.append((path, cum_conf))
 
@@ -84,8 +84,8 @@ def create_mapping(sentence, return_pt=False, tokenizer=None):
     #     sentence = sentence.replace(ch, "")
     text = sentence
     normalized_text = my_normalizer.normalize(text)
-    text = text.replace("‌", " ")
-    tokens = my_tokenizer.tokenize_words(normalized_text)
+    text = normalized_text.replace("‌", " ")
+    tokens = my_tokenizer.tokenize_words(text)
 
     # for token in tokens:
     #     token = my_stemmer.convert_to_stem(token)
@@ -202,7 +202,7 @@ def create_mapping(sentence, return_pt=False, tokenizer=None):
     mode = 0  # 1 in chunk, 0 not in chunk
     chunk_id = 0
     # print("verbs", verbs)
-    # print("noun_chunks:", noun_chunks)
+    print("noun_chunks:", noun_chunks)
 
     for idx, token in enumerate(tokens):
         # print("idx", idx)
@@ -229,6 +229,8 @@ def create_mapping(sentence, return_pt=False, tokenizer=None):
 
     for token in sentence_mapping:
         subtoken_ids = tokenizer(str(token), add_special_tokens=False)['input_ids']
+        print("token before tokenizer", token)
+        print("subtoken_ids", subtoken_ids)
         tokenid2word_mapping += [token2id[token]] * len(subtoken_ids)
         token_ids += subtoken_ids
     # print(tokenid2word_mapping)

@@ -71,7 +71,7 @@ def network_graph(cmd="venv/bin/python3.8 match.py"):
                                 text=etext,
                                 textfont=dict(
                                     size=16),
-                                textposition='top center',
+                                textposition='top left',
                                 hovertemplate='weight: %{text}<extra></extra>')
 
     node_x = []
