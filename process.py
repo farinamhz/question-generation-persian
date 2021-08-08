@@ -64,7 +64,7 @@ def filter_relation_sets(params):
         relations.append(id2token[near_verb_id])
         # print(relations)
         if len(relations) > 0:
-            return {'h': head, 't': tail, 'r': relations, 'c': confidence}
+            return {'h': head, 't': tail, 'r': relations[0], 'c': confidence}
     return {}
 
 def contains_number(value):
@@ -152,20 +152,23 @@ def deduplication2(output_tri):
                         break
     return output_tri
 
-# def deduplication(triplets):
-#     print("xxx1", triplets)
-#     unique_pairs = []
-#     pair_confidence = []
-#     for t in triplets:
-#         key = '{}\t{}\t{}'.format(t['h'], t['r'], t['t'])
-#         conf = t['c']
-#         if key not in unique_pairs:
-#             unique_pairs.append(key)
-#             pair_confidence.append(conf)
-#
-#     unique_triplets = []
-#     for idx, unique_pair in enumerate(unique_pairs):
-#         h, r, t = unique_pair.split('\t')
-#         unique_triplets.append({'h': h, 'r': r, 't': t, 'c': pair_confidence[idx]})
-#     print("xxx۲", unique_triplets)
-#     return unique_triplets
+
+def deduplication(triplets):
+    unique_pairs = []
+    pair_confidence = []
+    for t in triplets:
+        key = '{}\t{}\t{}'.format(t['h'], t['r'], t['t'])
+        conf = t['c']
+        if key not in unique_pairs:
+            unique_pairs.append(key)
+            pair_confidence.append(conf)
+        # else:
+            # print("key", key)
+
+    # print("unique_pairs", unique_pairs)
+    unique_triplets = []
+    for idx, unique_pair in enumerate(unique_pairs):
+        h, r, t = unique_pair.split('\t')
+        unique_triplets.append({'h': h, 'r': r, 't': t, 'c': pair_confidence[idx]})
+    # print(unique_triplets)
+    return unique_triplets

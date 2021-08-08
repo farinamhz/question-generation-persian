@@ -1,10 +1,12 @@
 import json
 import time
+
+from spacy.cli import debug_data
 from transformers import AutoConfig, AutoTokenizer, AutoModel, TFAutoModel, AutoModelForMaskedLM
 import spacy
 from tqdm import tqdm
 from parsivar import Tokenizer, Normalizer
-from process import parse_sentence, deduplication2
+from process import parse_sentence, deduplication2, deduplication
 
 # from process import parse_sentence, deduplication
 
@@ -51,5 +53,7 @@ if __name__ == '__main__':
                         if a['c'] > 0.05:
                             output_tri.append(a)
                     # after_d1 = deduplication(output_tri)
-                    output = {'line': idx, 'tri': deduplication2(output_tri)}
+                    # deduplication3(deduplication2(output_tri))
+                    output = {'line': idx, 'tri': deduplication2(deduplication(output_tri))}
+                    # output = {'line': idx, 'tri': deduplication2(output_tri)}
                     g.write(str(output) + '\n')
