@@ -132,7 +132,7 @@ app.layout = html.Div([
     html.Div(dcc.Graph(id='my_graph', figure={})),
     html.Br(),
     html.Br(),
-    # html.Button('Submit', id='submit-val', n_clicks=0)
+    html.Button('Submit', id='submit-val', n_clicks=0)
 
 ])
 
@@ -140,7 +140,7 @@ app.layout = html.Div([
 # Connect the Plotly graphs with Dash Components
 @app.callback(
     dash.dependencies.Output(component_id='my_graph', component_property='figure'),
-    # [dash.dependencies.Input('submit-val', 'n_clicks')],
+    [dash.dependencies.Input('submit-val', 'n_clicks')],
 )
 def update_graph(n_clicks):
     return network_graph()
