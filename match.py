@@ -41,8 +41,10 @@ if __name__ == '__main__':
             if len(sentence):
                 valid_triplets = []
                 sents = my_tokenizer.tokenize_sentences(my_normalizer.normalize(sentence))
+                # print("text", sentence)
+                # print("sents", sents)
                 for sent in sents:
-                    # print(sent)
+                    # print("sent", sent)
 
                     triplets_lst = parse_sentence(sent, tokenizer, encoder)
                     for triplets in triplets_lst:
