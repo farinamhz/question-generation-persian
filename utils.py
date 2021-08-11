@@ -13,7 +13,7 @@ my_stemmer = FindStems()
 my_tagger = POSTagger(tagging_model="wapiti")
 my_chunker = FindChunks()
 stop_words = "\n".join(sorted(list(
-    set([my_normalizer.normalize(w) for w in codecs.open('nonverbal', encoding='utf-8').read().split('\n') if w]))))
+    set([my_normalizer.normalize(w) for w in codecs.open('stopwords/nonverbal', encoding='utf-8').read().split('\n') if w]))))
 
 
 def build_graph(matrix):
