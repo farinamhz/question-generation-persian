@@ -84,22 +84,26 @@ def create_mapping(sentence, return_pt=False, tokenizer=None):
     #     sentence = sentence.replace(ch, "")
     text = sentence
     normalized_text = my_normalizer.normalize(text)
+    # print("text: ", normalized_text)
     text = normalized_text.replace("‌", " ")
     tokens = my_tokenizer.tokenize_words(text)
+    # print("tokens: ", tokens)
 
     # for token in tokens:
     #     token = my_stemmer.convert_to_stem(token)
     # print(tokens)
-
+    # print("text :", text)
     text_tags = my_tagger.parse(my_tokenizer.tokenize_words(text))
     chunks = my_chunker.chunk_sentence(text_tags)
     result = my_chunker.convert_nestedtree2rawstring(chunks)
 
     # print("tagged result", result)
+    # print("results before del puncs: ", result)
 
     for ch in ",-.«»؛،؟۰!":
         result = result.replace(ch, "")
 
+    # print("results after del puncs: ", result)
     # ###################################################3
     # verbs
     result_items_v = []
@@ -145,14 +149,14 @@ def create_mapping(sentence, return_pt=False, tokenizer=None):
             result_items.append(s.strip(" ]"))
             s = ""
     # print("result_items", result_items)
-
+    # print("results before del nonverbals: ", result_items)
     for i in range(len(result_items)):
         if result_items[i] in verbs:
             continue
         tokens1 = result_items[i].split(" ")
         tokens_filtered = [word for word in tokens1 if word not in stop_words]
         result_items[i] = " ".join(tokens_filtered)
-
+    # print("results after del nonverbals: ", result_items)
     for a in result_items:
         if a == '':
             result_items.remove('')
@@ -202,7 +206,7 @@ def create_mapping(sentence, return_pt=False, tokenizer=None):
     mode = 0  # 1 in chunk, 0 not in chunk
     chunk_id = 0
     # print("verbs", verbs)
-    print("noun_chunks:", noun_chunks)
+    # print("noun_chunks:", noun_chunks)
 
     for idx, token in enumerate(tokens):
         # print("idx", idx)
@@ -229,8 +233,8 @@ def create_mapping(sentence, return_pt=False, tokenizer=None):
 
     for token in sentence_mapping:
         subtoken_ids = tokenizer(str(token), add_special_tokens=False)['input_ids']
-        print("token before tokenizer", token)
-        print("subtoken_ids", subtoken_ids)
+        # print("token before tokenizer", token)
+        # print("subtoken_ids", subtoken_ids)
         tokenid2word_mapping += [token2id[token]] * len(subtoken_ids)
         token_ids += subtoken_ids
     # print(tokenid2word_mapping)
