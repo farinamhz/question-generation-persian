@@ -85,7 +85,8 @@ if __name__ == '__main__':
             answers.append(a['t'])
 
         elif entity_type.find("LOC") != -1:
-            s = a['h'] + " در کجا " + str(a['r']) + "؟"
+            # s = a['h'] + " در کجا " + str(a['r']) + "؟"
+            s = a['h'] + " کجا " + str(a['r']) + "؟"
             questions.append(s)
             answers.append(a['t'])
 
